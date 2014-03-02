@@ -12,7 +12,7 @@ public class Server
 {
 	private static final String MESSAGE_START_ERROR = "Falha ao iniciar o Servidor de chat";
 	private ServerSocket serverSocket;
-	private boolean isAlive;
+	private boolean alive;
 	public Server()
 	{}
 	
@@ -71,12 +71,12 @@ public class Server
 
 	public boolean isAlive()
 	{
-		return isAlive;
+		return alive;
 	}
 
 	public void setAlive(boolean isAlive)
 	{
-		this.isAlive = isAlive;
+		this.alive = isAlive;
 	}
 	
 	

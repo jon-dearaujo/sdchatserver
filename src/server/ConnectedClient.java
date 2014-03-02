@@ -13,6 +13,7 @@ public class ConnectedClient implements Runnable
 	private String clientName;
 	private BufferedReader clientIn;
 	private BufferedWriter clientOut;
+	private boolean connected;
 	
 	public String getClientName()
 	{
@@ -24,6 +25,7 @@ public class ConnectedClient implements Runnable
 		this.clientSocket = clientSocket;
 		this.clientName = clientName;
 		configureIO();
+		this.connected = true;
 	}
 	
 	private void configureIO()
@@ -41,13 +43,19 @@ public class ConnectedClient implements Runnable
 	@Override
 	public void run()
 	{
-		try
+		while (isConnected())
 		{
-			String submittedMessage = this.clientIn.readLine();
-			sendMessageForAll(submittedMessage);
-		} catch (IOException e)
-		{
-			e.printStackTrace();
+			try
+			{
+				String submittedMessage = this.clientIn.readLine();
+				if (submittedMessage != null && !submittedMessage.isEmpty())
+				{
+					sendMessageForAll(submittedMessage);
+				}
+			} catch (IOException e)
+			{
+				e.printStackTrace();
+			}
 		}
 	}
 
@@ -67,4 +75,15 @@ public class ConnectedClient implements Runnable
 		}
 	}
 
+	public boolean isConnected()
+	{
+		return connected;
+	}
+
+	public void setConnected(boolean connected)
+	{
+		this.connected = connected;
+	}
+	
+	
 }
