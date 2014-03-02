@@ -11,6 +11,7 @@ import server.exception.StartException;
 public class Server
 {
 	private static final String MESSAGE_START_ERROR = "Falha ao iniciar o Servidor de chat";
+	private static final int SERVER_PORT = 2031;
 	private ServerSocket serverSocket;
 	private boolean alive;
 	public Server()
@@ -20,7 +21,8 @@ public class Server
 	{
 		try
 		{
-			this.serverSocket = new ServerSocket(2031);
+			this.serverSocket = new ServerSocket(SERVER_PORT);
+			this.alive = true;
 		} catch (IOException e)
 		{
 			throw new StartException(MESSAGE_START_ERROR);
@@ -29,7 +31,6 @@ public class Server
 	
 	public void start()
 	{
-		//TODO mensagens de alerta server;
 		startServerSocket();
 		waitForConnections();
 	}
@@ -40,7 +41,7 @@ public class Server
 		{
 			try
 			{
-				Socket connectedClientsocket = getNewConnectedClientsocket();
+				Socket connectedClientsocket = getNewConnectedClientSocket();
 				BufferedReader clientIn = 
 						new BufferedReader( 
 								new InputStreamReader(connectedClientsocket.getInputStream()));
@@ -49,13 +50,12 @@ public class Server
 					.addAndStart(new ConnectedClient(clientName, connectedClientsocket));
 			} catch (IOException e)
 			{
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
 	}
 
-	private Socket getNewConnectedClientsocket()
+	private Socket getNewConnectedClientSocket()
 	{
 		Socket client = null;
 		try
@@ -63,7 +63,6 @@ public class Server
 			client = this.serverSocket.accept();
 		} catch (IOException e)
 		{
-			// TODO LOG!
 			e.printStackTrace();
 		}
 		return client;

@@ -6,7 +6,6 @@ import java.util.Set;
 
 public class ConnectedClientManager
 {
-//	private List<ConnectedClient> clients;
 	private Map<String, ConnectedClient> clients;
 	private static ConnectedClientManager instance;
 	

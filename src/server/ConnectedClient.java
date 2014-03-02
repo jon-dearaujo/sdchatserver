@@ -77,7 +77,7 @@ public class ConnectedClient implements Runnable
 
 	public boolean isConnected()
 	{
-		return connected;
+		return connected && this.clientSocket.isConnected();
 	}
 
 	public void setConnected(boolean connected)
