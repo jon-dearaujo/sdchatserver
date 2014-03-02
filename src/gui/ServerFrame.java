@@ -3,6 +3,8 @@ package gui;
 import java.awt.Container;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -41,6 +43,8 @@ public class ServerFrame extends JFrame
 		startButton.setToolTipText("Start server");
 		JButton stopButton = new JButton(new ImageIcon("res/stop.png"));
 		JTextArea logArea = new JTextArea();
+		startButton.addActionListener(new StartButtonHandler(stopButton));
+		stopButton.addActionListener(new StopButtonHandler(startButton));
 		stopButton.setToolTipText("Stop server");
 		JScrollPane logScrollPane = new JScrollPane(logArea);
 		
@@ -57,5 +61,37 @@ public class ServerFrame extends JFrame
 		constraints.gridwidth = 2;
 		constraints.weighty = 1;
 		container.add(logScrollPane, constraints);
+	}
+}
+
+class StartButtonHandler implements ActionListener
+{
+	private JButton buttonToEnable;
+	public StartButtonHandler(JButton buttonToDisable)
+	{
+		this.buttonToEnable = buttonToDisable;
+	}
+	
+	@Override
+	public void actionPerformed(ActionEvent e)
+	{
+		((JButton)e.getSource()).setEnabled(false);
+		this.buttonToEnable.setEnabled(true);
+	}
+}
+
+class StopButtonHandler implements ActionListener
+{
+	private JButton buttonToDisable;
+	public StopButtonHandler(JButton buttonToDisable)
+	{
+		this.buttonToDisable = buttonToDisable;
+	}
+	
+	@Override
+	public void actionPerformed(ActionEvent e)
+	{
+		((JButton)e.getSource()).setEnabled(false);
+		this.buttonToDisable.setEnabled(true);
 	}
 }
