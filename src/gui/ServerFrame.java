@@ -12,14 +12,22 @@ import javax.swing.JFrame;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
+import program.ServerLog;
+import server.Server;
+
 
 public class ServerFrame extends JFrame
 {
+	private JButton startButton;
+	private JButton stopButton;
+	private JTextArea logArea;
+	private JScrollPane logScrollPane;
 	public ServerFrame()
 	{
 		configureLayout();
 		basicConfiguration();
 		this.setVisible(true);
+		ServerLog.addDefaultLogAppender(new GuiLogAppender(this.logArea));
 	}
 
 	private void basicConfiguration()
@@ -33,20 +41,21 @@ public class ServerFrame extends JFrame
 	
 	private void configureLayout()
 	{
-		
 		GridBagLayout layout = new GridBagLayout();
 		GridBagConstraints constraints = new GridBagConstraints();
 		Container container = this.getContentPane();
 		container.setLayout(layout);
 		
-		JButton startButton = new JButton(new ImageIcon("res/start.png"));
+		startButton = new JButton(new ImageIcon("res/start.png"));
 		startButton.setToolTipText("Start server");
 		JButton stopButton = new JButton(new ImageIcon("res/stop.png"));
-		JTextArea logArea = new JTextArea();
+		logArea = new JTextArea();
+		logArea.setEditable(false);
 		startButton.addActionListener(new StartButtonHandler(stopButton));
 		stopButton.addActionListener(new StopButtonHandler(startButton));
 		stopButton.setToolTipText("Stop server");
-		JScrollPane logScrollPane = new JScrollPane(logArea);
+		stopButton.setEnabled(false);
+		logScrollPane = new JScrollPane(logArea);
 		
 		constraints.weightx = 1;
 		constraints.weighty = 0.1;
@@ -67,9 +76,9 @@ public class ServerFrame extends JFrame
 class StartButtonHandler implements ActionListener
 {
 	private JButton buttonToEnable;
-	public StartButtonHandler(JButton buttonToDisable)
+	public StartButtonHandler(JButton buttonToEnable)
 	{
-		this.buttonToEnable = buttonToDisable;
+		this.buttonToEnable = buttonToEnable;
 	}
 	
 	@Override
@@ -77,6 +86,8 @@ class StartButtonHandler implements ActionListener
 	{
 		((JButton)e.getSource()).setEnabled(false);
 		this.buttonToEnable.setEnabled(true);
+		
+		Server.getInstance().start();
 	}
 }
 
@@ -93,5 +104,6 @@ class StopButtonHandler implements ActionListener
 	{
 		((JButton)e.getSource()).setEnabled(false);
 		this.buttonToDisable.setEnabled(true);
+		Server.getInstance().stop();
 	}
 }

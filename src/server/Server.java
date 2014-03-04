@@ -6,16 +6,31 @@ import java.io.InputStreamReader;
 import java.net.ServerSocket;
 import java.net.Socket;
 
+import org.apache.log4j.Logger;
+
+import program.ServerLog;
+
 import server.exception.StartException;
 
-public class Server
+public class Server implements Runnable
 {
-	private static final String MESSAGE_START_ERROR = "Falha ao iniciar o Servidor de chat";
+	
+	private static Server instance;
+	private static final String MESSAGE_START_ERROR = "Falha ao iniciar o Servidor de chat\n";
+	private static final String MESSAGE_START_SUCCESS = "server started successfully\n";
+	private static final String MESSAGE_STOP_SERVER = "Server will shut down\n";
 	private static final int SERVER_PORT = 2031;
 	private ServerSocket serverSocket;
 	private boolean alive;
-	public Server()
-	{}
+	
+	public static Server getInstance()
+	{
+		if(instance == null)
+		{
+			instance = new Server();
+		}
+		return instance;
+	}
 	
 	private void startServerSocket()
 	{
@@ -25,18 +40,39 @@ public class Server
 			this.alive = true;
 		} catch (IOException e)
 		{
-			throw new StartException(MESSAGE_START_ERROR);
+			ServerLog.getDefaultLog().error(MESSAGE_START_ERROR);
 		}
 	}
 	
 	public void start()
 	{
 		startServerSocket();
-		waitForConnections();
+		new Thread(this).start();
+		
 	}
 	
-	private void waitForConnections()
+	private Socket getNewConnectedClientSocket() throws IOException
 	{
+		Socket client = null;
+		client = this.serverSocket.accept();
+		client.close();
+		return client;
+	}
+
+	public boolean isAlive()
+	{
+		return alive;
+	}
+
+	public void setAlive(boolean isAlive)
+	{
+		this.alive = isAlive;
+	}
+
+	@Override
+	public void run()
+	{
+		ServerLog.getDefaultLog().info(MESSAGE_START_SUCCESS);
 		while (isAlive())
 		{
 			try
@@ -50,33 +86,24 @@ public class Server
 					.addAndStart(new ConnectedClient(clientName, connectedClientsocket));
 			} catch (IOException e)
 			{
-				e.printStackTrace();
+				ServerLog.getDefaultLog().error("An error occurred : "+ e.getMessage() +"\n");
+				ServerLog.getDefaultLog().info(MESSAGE_STOP_SERVER);
 			}
 		}
 	}
-
-	private Socket getNewConnectedClientSocket()
+	
+	public void stop()
 	{
-		Socket client = null;
+		this.setAlive(false);
 		try
 		{
-			client = this.serverSocket.accept();
+			this.serverSocket.close();
+			ServerLog.getDefaultLog().info(MESSAGE_STOP_SERVER);
 		} catch (IOException e)
 		{
-			e.printStackTrace();
+			ServerLog.getDefaultLog().error("An error occurred\n");
+			ServerLog.getDefaultLog().info(MESSAGE_STOP_SERVER);
 		}
-		return client;
+		
 	}
-
-	public boolean isAlive()
-	{
-		return alive;
-	}
-
-	public void setAlive(boolean isAlive)
-	{
-		this.alive = isAlive;
-	}
-	
-	
 }
