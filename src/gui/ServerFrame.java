@@ -18,6 +18,7 @@ import server.Server;
 
 public class ServerFrame extends JFrame
 {
+	private static final long serialVersionUID = 1L;
 	private JButton startButton;
 	private JButton stopButton;
 	private JTextArea logArea;
@@ -37,6 +38,7 @@ public class ServerFrame extends JFrame
 		this.setSize(500, 300);
 		this.setResizable(false);
 		this.setLocationRelativeTo(null);
+		this.setIconImage(new ImageIcon("res/chat_icon.png").getImage());
 	}
 	
 	private void configureLayout()
@@ -48,7 +50,7 @@ public class ServerFrame extends JFrame
 		
 		startButton = new JButton(new ImageIcon("res/start.png"));
 		startButton.setToolTipText("Start server");
-		JButton stopButton = new JButton(new ImageIcon("res/stop.png"));
+		stopButton = new JButton(new ImageIcon("res/stop.png"));
 		logArea = new JTextArea();
 		logArea.setEditable(false);
 		startButton.addActionListener(new StartButtonHandler(stopButton));

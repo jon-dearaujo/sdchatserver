@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import program.ServerLog;
+
 public class ConnectedClientManager
 {
 	private Map<String, ConnectedClient> clients;
@@ -27,6 +29,7 @@ public class ConnectedClientManager
 	{
 		this.clients.put(client.getClientName(), client);
 		new Thread(client).start();
+		ServerLog.getDefaultLog().info(client.getClientName().concat(" connected"));
 	}
 	
 	public void sendMessageToAllConnectedClient(String clientId, String message)
@@ -37,6 +40,25 @@ public class ConnectedClientManager
 		{
 			clients.get(key).writeMessage(formattedMessage);
 		}
-		
+	}
+	
+	public void shutDownAllClients()
+	{
+		Set<String> keys = clients.keySet();
+		for (String key : keys)
+		{
+			removeClient(key);
+		}
+	}
+
+	public void removeClient(String clientName)
+	{
+		if(clients.containsKey(clientName))
+		{
+			ConnectedClient client = clients.get(clientName);
+			client.setConnected(false);
+			
+			this.clients.remove(clientName);
+		}
 	}
 }

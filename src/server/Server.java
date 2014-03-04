@@ -6,11 +6,7 @@ import java.io.InputStreamReader;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-import org.apache.log4j.Logger;
-
 import program.ServerLog;
-
-import server.exception.StartException;
 
 public class Server implements Runnable
 {
@@ -73,12 +69,13 @@ public class Server implements Runnable
 	public void run()
 	{
 		ServerLog.getDefaultLog().info(MESSAGE_START_SUCCESS);
+		BufferedReader clientIn = null;
 		while (isAlive())
 		{
 			try
 			{
 				Socket connectedClientsocket = getNewConnectedClientSocket();
-				BufferedReader clientIn = 
+				clientIn = 
 						new BufferedReader( 
 								new InputStreamReader(connectedClientsocket.getInputStream()));
 				String clientName = clientIn.readLine();
@@ -86,8 +83,16 @@ public class Server implements Runnable
 					.addAndStart(new ConnectedClient(clientName, connectedClientsocket));
 			} catch (IOException e)
 			{
-				ServerLog.getDefaultLog().error("An error occurred : "+ e.getMessage() +"\n");
-				ServerLog.getDefaultLog().info(MESSAGE_STOP_SERVER);
+				try
+				{
+					if(clientIn != null)
+					{
+						clientIn.close();
+					}
+				} catch (IOException e1)
+				{}
+				ServerLog.getDefaultLog().error(e.getMessage()+"\n");
+				
 			}
 		}
 	}
