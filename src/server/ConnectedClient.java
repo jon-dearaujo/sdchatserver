@@ -76,6 +76,7 @@ public class ConnectedClient implements Runnable
 				this.clientSocket.close();
 				this.clientIn.close();
 				this.clientOut.close();
+				ConnectedClientManager.getInstance().removeClient(this.getClientName());
 			} catch (IOException e)
 			{
 				ServerLog.getDefaultLog().info(String.format(CLIENT_DISCONNECTED, this.getClientName()));

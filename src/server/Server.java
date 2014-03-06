@@ -10,12 +10,11 @@ import program.ServerLog;
 
 public class Server implements Runnable
 {
-	
+	public static final int SERVER_PORT = 2031;
 	private static Server instance;
 	private static final String MESSAGE_START_ERROR = "Falha ao iniciar o Servidor de chat\n";
 	private static final String MESSAGE_START_SUCCESS = "server started successfully\n";
 	private static final String MESSAGE_STOP_SERVER = "Server will shut down\n";
-	private static final int SERVER_PORT = 2031;
 	private ServerSocket serverSocket;
 	private boolean alive;
 	
@@ -75,8 +74,7 @@ public class Server implements Runnable
 			try
 			{
 				Socket connectedClientsocket = getNewConnectedClientSocket();
-				clientIn = 
-						new BufferedReader( 
+				clientIn = new BufferedReader( 
 								new InputStreamReader(connectedClientsocket.getInputStream()));
 				String clientName = clientIn.readLine();
 				ConnectedClientManager.getInstance()
@@ -92,7 +90,6 @@ public class Server implements Runnable
 				} catch (IOException e1)
 				{}
 				ServerLog.getDefaultLog().error(e.getMessage()+"\n");
-				
 			}
 		}
 	}
@@ -103,6 +100,7 @@ public class Server implements Runnable
 		try
 		{
 			this.serverSocket.close();
+			ConnectedClientManager.getInstance().shutDownAllClients();
 			ServerLog.getDefaultLog().info(MESSAGE_STOP_SERVER);
 		} catch (IOException e)
 		{
