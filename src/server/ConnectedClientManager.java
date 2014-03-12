@@ -62,7 +62,7 @@ public class ConnectedClientManager
 		{
 			ConnectedClient client = clients.get(clientName);
 			client.setConnected(false);
-			
+			sendMessageToAllConnectedClient("SERVER", clientName.concat(" disconnected"));
 			this.clients.remove(clientName);
 		}
 	}
