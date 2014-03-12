@@ -5,6 +5,7 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
 import java.net.Socket;
 
 import program.ServerLog;
@@ -17,12 +18,16 @@ public class ConnectedClient implements Runnable
 	private Socket clientSocket;
 	private String clientName;
 	private BufferedReader clientIn;
-	private BufferedWriter clientOut;
+	private PrintWriter clientOut;
 	private boolean connected;
 	
 	public String getClientName()
 	{
 		return clientName;
+	}
+	
+	public void setClientName(String clientName) {
+		this.clientName = clientName;
 	}
 
 	public ConnectedClient(String clientName, Socket clientSocket)
@@ -33,16 +38,22 @@ public class ConnectedClient implements Runnable
 		this.connected = true;
 	}
 	
+	public ConnectedClient(Socket clientSocket)
+	{
+		this.clientSocket = clientSocket;
+		configureIO();
+		this.connected = true;
+	}
+	
 	private void configureIO()
 	{
 		try
 		{
 			this.clientIn = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-			this.clientOut = new BufferedWriter(new OutputStreamWriter(clientSocket.getOutputStream()));
+			this.clientOut = new PrintWriter(clientSocket.getOutputStream(), true);
 		} catch (IOException e)
 		{
-			ServerLog.getDefaultLog()
-				.error(String.format(ERROR_CONFIGURE_CLIENT_IO, this.getClientName()));
+			System.out.println(String.format(ERROR_CONFIGURE_CLIENT_IO, this.getClientName()));
 		}
 	}
 	
@@ -53,18 +64,25 @@ public class ConnectedClient implements Runnable
 		{
 			try
 			{
-				String submittedMessage = this.clientIn.readLine();
-				if (submittedMessage != null && !submittedMessage.isEmpty())
+				String submittedMessage = clientIn.readLine();
+				if (submittedMessage != null)
 				{
-					sendMessageForAll(submittedMessage);
+					if(!submittedMessage.isEmpty())
+					{
+						sendMessageForAll(submittedMessage);
+					}
+				}else
+				{
+					break;
 				}
 			} catch (IOException e)
 			{
-				ServerLog.getDefaultLog()
-					.error(String.format(ERROR_CLIENT, this.getClientName()).toString());
+				System.out.println(String.format(ERROR_CLIENT, this.getClientName()).toString());
+				close();
 			}
 		}
 		close();
+		
 	}
 
 	private void close()
@@ -77,33 +95,33 @@ public class ConnectedClient implements Runnable
 				this.clientIn.close();
 				this.clientOut.close();
 				ConnectedClientManager.getInstance().removeClient(this.getClientName());
+				System.out.println(String.format(CLIENT_DISCONNECTED, this.getClientName()));
 			} catch (IOException e)
 			{
-				ServerLog.getDefaultLog().info(String.format(CLIENT_DISCONNECTED, this.getClientName()));
+				System.out.println(String.format(ERROR_CLIENT, this.getClientName()).toString());
 			}
 		}
 	}
 
 	private void sendMessageForAll(String submittedMessage)
 	{
-		sendMessageForAll(submittedMessage);
+		ConnectedClientManager.getInstance().sendMessageToAllConnectedClient(getClientName(), submittedMessage);
+	}
+	
+	public BufferedReader getClientIn()
+	{
+	return this.clientIn;	
 	}
 	
 	public void writeMessage(String message)
 	{
-		try
-		{
-			this.clientOut.write(message);
-		} catch (IOException e)
-		{
-			ServerLog.getDefaultLog()
-			.error(String.format(ERROR_CLIENT, this.getClientName()).toString());
-		}
+		this.clientOut.println(message);
+		this.clientOut.flush();
 	}
 
 	public boolean isConnected()
 	{
-		return connected && this.clientSocket.isConnected();
+		return connected && !this.clientSocket.isClosed();
 	}
 
 	public void setConnected(boolean connected)

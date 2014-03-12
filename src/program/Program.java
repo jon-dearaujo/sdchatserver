@@ -1,5 +1,6 @@
 package program;
 
+import server.Server;
 import gui.ServerFrame;
 
 public class Program
@@ -10,7 +11,7 @@ public class Program
 	 */
 	public static void main(String[] args)
 	{
-		new ServerFrame();
+		new Server().getInstance().start();
 	}
 
 }

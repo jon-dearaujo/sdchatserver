@@ -9,6 +9,7 @@ import program.ServerLog;
 public class ConnectedClientManager
 {
 	private Map<String, ConnectedClient> clients;
+	private int clientCount;
 	private static ConnectedClientManager instance;
 	
 	public static ConnectedClientManager getInstance()
@@ -27,9 +28,13 @@ public class ConnectedClientManager
 	
 	public void addAndStart(ConnectedClient client)
 	{
+		clientCount++;
+		String clientName = "client"+clientCount;
+		client.setClientName(clientName);
 		this.clients.put(client.getClientName(), client);
 		new Thread(client).start();
-		ServerLog.getDefaultLog().info(client.getClientName().concat(" connected"));
+		System.out.println(client.getClientName().concat(" connected"));
+		
 	}
 	
 	public void sendMessageToAllConnectedClient(String clientId, String message)

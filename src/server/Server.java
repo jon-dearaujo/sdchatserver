@@ -8,7 +8,7 @@ import java.net.Socket;
 
 import program.ServerLog;
 
-public class Server implements Runnable
+public class Server
 {
 	public static final int SERVER_PORT = 2031;
 	private static Server instance;
@@ -42,7 +42,7 @@ public class Server implements Runnable
 	public void start()
 	{
 		startServerSocket();
-		new Thread(this).start();
+		run();
 		
 	}
 	
@@ -50,7 +50,6 @@ public class Server implements Runnable
 	{
 		Socket client = null;
 		client = this.serverSocket.accept();
-		client.close();
 		return client;
 	}
 
@@ -64,31 +63,18 @@ public class Server implements Runnable
 		this.alive = isAlive;
 	}
 
-	@Override
 	public void run()
 	{
-		ServerLog.getDefaultLog().info(MESSAGE_START_SUCCESS);
-		BufferedReader clientIn = null;
+		System.out.println(MESSAGE_START_SUCCESS);
 		while (isAlive())
 		{
 			try
 			{
 				Socket connectedClientsocket = getNewConnectedClientSocket();
-				clientIn = new BufferedReader( 
-								new InputStreamReader(connectedClientsocket.getInputStream()));
-				String clientName = clientIn.readLine();
 				ConnectedClientManager.getInstance()
-					.addAndStart(new ConnectedClient(clientName, connectedClientsocket));
+					.addAndStart(new ConnectedClient(connectedClientsocket));
 			} catch (IOException e)
 			{
-				try
-				{
-					if(clientIn != null)
-					{
-						clientIn.close();
-					}
-				} catch (IOException e1)
-				{}
 				ServerLog.getDefaultLog().error(e.getMessage()+"\n");
 			}
 		}
