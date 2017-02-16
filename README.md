@@ -1,4 +1,4 @@
 sdchatserver
 ============
 
-A java chat server socket based.
+A socket based java chat server.
